@@ -1,2 +1,2 @@
-python src/code/main.py
+python src/gui/gui.py
 pause
