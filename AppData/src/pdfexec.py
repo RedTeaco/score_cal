@@ -5,6 +5,20 @@ import re
 
 from pdfplumber import open
 
+def is_number(s):
+    try:
+        float(s) # 尝试将字符串转换为浮点数
+        return True
+    except ValueError: # 如果转换失败，说明字符串不是数字
+        pass
+
+    try:
+        import unicodedata
+        unicodedata.numeric(s) # 尝试将字符串转换为数字，包括Unicode数字
+        return True
+    except (TypeError, ValueError): # 如果转换失败，说明字符串不是数字
+        pass
+    return False
 
 class pdf:
     def __init__(self, pdf_path: str, need_terms: int):
@@ -38,9 +52,8 @@ class pdf:
                 dicts[terms] = []
                 continue
             if terms in dicts.keys():
-                if l[-1] == '':
-                    if '体育' not in l[1]:
-                        dicts[terms].append(l)
+                if l[1] and is_number(l[3]) and is_number(l[4]) and '体育' not in l[1]:
+                    dicts[terms].append(l)
         return dicts
 
     def cal(self) -> float:
@@ -50,8 +63,10 @@ class pdf:
         # 计算G21
         for i in range(2):
             for l in dicts[self.need_terms[i]]:
+                print(l)
                 score += float(l[3]) * float(l[4])
                 weight += float(l[3])
+        print("".join(("课程加权综合:",str(score),"学分总和:",str(weight))))
         return score / weight
 
 
@@ -64,6 +79,6 @@ def main(pdf_paths: list, terms):
 
 
 if __name__ == '__main__':
-    pdf_path = r'D:\Study\python\Complition\Score\0824007.pdf'
-    pdfT = pdf(pdf_path, 2022)
+    pdf_path = "D:\\AccountDatas\\RedTea\Downloads\\ydxscjtzd(1).pdf"
+    pdfT = pdf(pdf_path, 2024)
     print(pdfT.G21)
